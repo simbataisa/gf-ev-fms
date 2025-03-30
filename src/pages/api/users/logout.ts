@@ -7,7 +7,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    await payload.logout(req, res);
+    // Use the correct method for logging out in Payload CMS
+    await payload.logout({
+      req,
+      res
+    });
     res.status(200).json({ message: 'Logged out successfully' });
   } catch (error: any) {
     console.error('Logout error:', error);

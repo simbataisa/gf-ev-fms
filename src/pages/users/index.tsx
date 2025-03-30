@@ -15,8 +15,14 @@ const UsersPage: React.FC = () => {
   
   // Users API hooks
   const getUsers = async (): Promise<User[]> => {
-    const response = await axios.get('/api/users');
-    return response.data.docs;
+    try {
+      const response = await axios.get('/api/users');
+      // Check if response.data has a docs property or if it's an array directly
+      return Array.isArray(response.data) ? response.data : response.data.docs || [];
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return [];
+    }
   };
 
   const createUser = async (user: Partial<User> & { password: string }): Promise<User> => {
@@ -37,7 +43,12 @@ const UsersPage: React.FC = () => {
     await axios.post(`/api/users/${id}/update-password`, { password });
   };
 
-  const { data: users = [], isLoading } = useQuery('users', getUsers);
+  const { data: users = [], isLoading, error } = useQuery('users', getUsers, {
+    onError: (err) => {
+      console.error('Error in users query:', err);
+      message.error('Failed to load users');
+    }
+  });
   
   const createUserMutation = useMutation(createUser, {
     onSuccess: () => {
