@@ -1,6 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EV Lifecycle Management Application
+
+A comprehensive web application for managing the entire lifecycle of electric vehicles, including user management, vehicle tracking, charging schedules, maintenance, and reporting.
+
+## Technologies Used
+
+- Next.js
+- React
+- TypeScript
+- Ant Design
+- Payload CMS
+- React Query
+- Docker
+
+## Features
+
+- User authentication and role-based access control
+- Vehicle management and tracking
+- Charging schedule management
+- Maintenance record tracking
+- Comprehensive reporting
+- Responsive UI with Ant Design
 
 ## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or later)
+- npm or yarn
+- MongoDB (for Payload CMS)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+npm install
+```
 
 First, run the development server:
 
