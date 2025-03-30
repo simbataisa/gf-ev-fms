@@ -5,18 +5,20 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
+  // Remove the custom distDir to use Next.js default ".next"
+  // distDir: 'dist',
+  
+  // Environment variables should be set in Vercel dashboard for production
+  // These will be used for local development only
   env: {
-    MONGODB_URI: 'mongodb://localhost:27017/ev-management',
-    PAYLOAD_SECRET: 'your-secret-key',
-    NEXT_PUBLIC_SERVER_URL: 'http://localhost:3001', // Updated port
+    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/gf-ev-fms',
+    PAYLOAD_SECRET: process.env.PAYLOAD_SECRET || 'your-secret-key',
+    NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
   },
-  // Explicitly set the output directory
-  distDir: 'dist',
-  // Disable file system watching for specific directories if needed
+  
+  // Keep the onDemandEntries config
   onDemandEntries: {
-    // period (in ms) where the server will keep pages in the buffer
     maxInactiveAge: 25 * 1000,
-    // number of pages that should be kept simultaneously without being disposed
     pagesBufferLength: 2,
   },
 };
