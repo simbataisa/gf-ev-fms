@@ -1,60 +1,74 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import axios from 'axios';
-import { Vehicle } from '../types';
+
+export interface Vehicle {
+  id: string;
+  name: string;
+  model: string;
+  manufacturer: string;
+  year: number;
+  licensePlate: string;
+  vin: string;
+  batteryCapacity: number;
+  range: number;
+  status: string;
+  currentCharge: number;
+  drivers?: any[];
+}
 
 export const useVehicles = () => {
   const queryClient = useQueryClient();
 
-  const getVehicles = async (): Promise<Vehicle[]> => {
-    const response = await axios.get('/api/vehicles');
-    return response.data.docs;
+  const useGetVehicles = () => {
+    return useQuery<Vehicle[]>('vehicles', async () => {
+      const { data } = await axios.get('/api/vehicles');
+      return data.docs;
+    });
   };
 
-  const getVehicle = async (id: string): Promise<Vehicle> => {
-    const response = await axios.get(`/api/vehicles/${id}`);
-    return response.data;
+  const useCreateVehicle = () => {
+    return useMutation(
+      async (vehicleData: Partial<Vehicle>) => {
+        const { data } = await axios.post('/api/vehicles', vehicleData);
+        return data;
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries('vehicles');
+        },
+      }
+    );
   };
 
-  const createVehicle = async (vehicle: Partial<Vehicle>): Promise<Vehicle> => {
-    const response = await axios.post('/api/vehicles', vehicle);
-    return response.data;
+  const useUpdateVehicle = () => {
+    return useMutation(
+      async ({ id, ...vehicleData }: Partial<Vehicle> & { id: string }) => {
+        const { data } = await axios.patch(`/api/vehicles/${id}`, vehicleData);
+        return data;
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries('vehicles');
+        },
+      }
+    );
   };
 
-  const updateVehicle = async ({ id, ...vehicle }: Partial<Vehicle> & { id: string }): Promise<Vehicle> => {
-    const response = await axios.patch(`/api/vehicles/${id}`, vehicle);
-    return response.data;
+  const useDeleteVehicle = () => {
+    return useMutation(
+      async (id: string) => {
+        await axios.delete(`/api/vehicles/${id}`);
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries('vehicles');
+        },
+      }
+    );
   };
-
-  const deleteVehicle = async (id: string): Promise<void> => {
-    await axios.delete(`/api/vehicles/${id}`);
-  };
-
-  const useGetVehicles = () => useQuery('vehicles', getVehicles);
-  
-  const useGetVehicle = (id: string) => useQuery(['vehicle', id], () => getVehicle(id));
-
-  const useCreateVehicle = () => useMutation(createVehicle, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('vehicles');
-    },
-  });
-
-  const useUpdateVehicle = () => useMutation(updateVehicle, {
-    onSuccess: (data) => {
-      queryClient.invalidateQueries('vehicles');
-      queryClient.invalidateQueries(['vehicle', data.id]);
-    },
-  });
-
-  const useDeleteVehicle = () => useMutation(deleteVehicle, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('vehicles');
-    },
-  });
 
   return {
     useGetVehicles,
-    useGetVehicle,
     useCreateVehicle,
     useUpdateVehicle,
     useDeleteVehicle,

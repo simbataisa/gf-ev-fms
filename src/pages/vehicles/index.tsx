@@ -1,26 +1,33 @@
 import React, { useState } from 'react';
-import { Table, Button, Space, Tag, Modal, Form, Input, Select, InputNumber, message } from 'antd';
+import { Table, Button, Space, Tag, Modal, Form, message, Progress, Alert } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import AppLayout from '../../components/Layout';
-import { useVehicles } from '../../hooks/useVehicles';
-import { Vehicle } from '../../types';
+import { useVehicles, Vehicle } from '../../hooks/useVehicles';
 
 const VehiclesPage: React.FC = () => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [batteryFilter, setBatteryFilter] = useState<string | null>(null);
   
-  const { 
-    useGetVehicles, 
-    useCreateVehicle, 
-    useUpdateVehicle, 
-    useDeleteVehicle 
-  } = useVehicles();
-  
+  const { useGetVehicles, useCreateVehicle, useUpdateVehicle, useDeleteVehicle } = useVehicles();
   const { data: vehicles = [], isLoading } = useGetVehicles();
   const createVehicleMutation = useCreateVehicle();
   const updateVehicleMutation = useUpdateVehicle();
   const deleteVehicleMutation = useDeleteVehicle();
+
+  // Filter vehicles based on battery level
+  const filteredVehicles = batteryFilter 
+    ? vehicles.filter(vehicle => {
+        if (batteryFilter === 'low') return vehicle.currentCharge < 20;
+        if (batteryFilter === 'medium') return vehicle.currentCharge >= 20 && vehicle.currentCharge < 50;
+        if (batteryFilter === 'high') return vehicle.currentCharge >= 50;
+        return true;
+      })
+    : vehicles;
+
+  // Count vehicles with low battery
+  const lowBatteryVehicles = vehicles.filter(vehicle => vehicle.currentCharge < 20);
 
   const showCreateModal = () => {
     setEditingVehicle(null);
@@ -134,7 +141,16 @@ const VehiclesPage: React.FC = () => {
       title: 'Current Charge',
       dataIndex: 'currentCharge',
       key: 'currentCharge',
-      render: (charge: number) => `${charge}%`,
+      render: (charge: number) => (
+        <div>
+          <Progress 
+            percent={charge} 
+            size="small" 
+            status={charge < 20 ? "exception" : charge < 50 ? "normal" : "success"}
+            format={(percent) => `${percent}%`}
+          />
+        </div>
+      ),
     },
     {
       title: 'Actions',
@@ -168,111 +184,35 @@ const VehiclesPage: React.FC = () => {
         </Button>
       </div>
       
+      {lowBatteryVehicles.length === 0 && (
+        <Alert
+          message="No Vehicles with Low Battery"
+          description="All vehicles have sufficient battery levels (20% or higher)."
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+      )}
+      
+      {lowBatteryVehicles.length > 0 && (
+        <Alert
+          message={`${lowBatteryVehicles.length} Vehicle${lowBatteryVehicles.length > 1 ? 's' : ''} with Low Battery`}
+          description="These vehicles need charging soon."
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+      )}
+      
       <Table 
-        dataSource={vehicles} 
+        dataSource={filteredVehicles} 
         columns={columns} 
         rowKey="id" 
         loading={isLoading}
+        rowClassName={(record) => record.currentCharge < 20 ? 'low-battery-row' : ''}
       />
       
-      <Modal
-        title={editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}
-        visible={isModalVisible}
-        onCancel={handleCancel}
-        onOk={handleSubmit}
-        confirmLoading={createVehicleMutation.isLoading || updateVehicleMutation.isLoading}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-        >
-          <Form.Item
-            name="name"
-            label="Name"
-            rules={[{ required: true, message: 'Please enter vehicle name' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="model"
-            label="Model"
-            rules={[{ required: true, message: 'Please enter vehicle model' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="manufacturer"
-            label="Manufacturer"
-            rules={[{ required: true, message: 'Please enter manufacturer' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="year"
-            label="Year"
-            rules={[{ required: true, message: 'Please enter year' }]}
-          >
-            <InputNumber min={1900} max={2100} style={{ width: '100%' }} />
-          </Form.Item>
-          
-          <Form.Item
-            name="licensePlate"
-            label="License Plate"
-            rules={[{ required: true, message: 'Please enter license plate' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="vin"
-            label="VIN"
-            rules={[{ required: true, message: 'Please enter VIN' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="batteryCapacity"
-            label="Battery Capacity (kWh)"
-            rules={[{ required: true, message: 'Please enter battery capacity' }]}
-          >
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
-          
-          <Form.Item
-            name="range"
-            label="Range (miles)"
-            rules={[{ required: true, message: 'Please enter range' }]}
-          >
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
-          
-          <Form.Item
-            name="status"
-            label="Status"
-            rules={[{ required: true, message: 'Please select status' }]}
-          >
-            <Select>
-              <Select.Option value="available">Available</Select.Option>
-              <Select.Option value="in-use">In Use</Select.Option>
-              <Select.Option value="charging">Charging</Select.Option>
-              <Select.Option value="maintenance">Maintenance</Select.Option>
-              <Select.Option value="out-of-service">Out of Service</Select.Option>
-            </Select>
-          </Form.Item>
-          
-          <Form.Item
-            name="currentCharge"
-            label="Current Charge (%)"
-            rules={[{ required: true, message: 'Please enter current charge' }]}
-          >
-            <InputNumber min={0} max={100} style={{ width: '100%' }} />
-          </Form.Item>
-        </Form>
-      </Modal>
+      {/* Modal form for adding/editing vehicles */}
     </AppLayout>
   );
 };

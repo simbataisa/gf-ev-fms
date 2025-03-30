@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppProps } from 'next/app';
+import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { ConfigProvider } from 'antd';
@@ -22,7 +22,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ConfigProvider>
         <Component {...pageProps} />
       </ConfigProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {process.env.NODE_ENV !== 'production' && <ReactQueryDevtools />}
     </QueryClientProvider>
   );
 }

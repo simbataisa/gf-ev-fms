@@ -91,9 +91,10 @@ const ReportsPage: React.FC = () => {
       },
     },
     {
+      // In the columns definition, change:
       title: 'Date Range',
       key: 'dateRange',
-      render: (_, record: Report) => (
+      render: (_: unknown, record: Report) => (
         <span>
           {moment(record.dateRange.startDate).format('YYYY-MM-DD')} to {moment(record.dateRange.endDate).format('YYYY-MM-DD')}
         </span>

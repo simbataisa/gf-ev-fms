@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String
+  firstName   String
+  lastName    String
+  role        String
+  phoneNumber String?
+  address     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  reports     Report[]
+  vehicles    Vehicle[] @relation("AssignedDrivers")
+}
+
+model Vehicle {
+  id              String              @id @default(uuid())
+  name            String
+  model           String
+  manufacturer    String
+  year            Int
+  licensePlate    String              @unique
+  vin             String              @unique
+  batteryCapacity Float
+  range           Float
+  status          String
+  currentCharge   Float
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  drivers         User[]              @relation("AssignedDrivers")
+  maintenances    MaintenanceRecord[]
+  chargings       ChargingSchedule[]
+}
+
+model ChargingSchedule {
+  id                String   @id @default(uuid())
+  title             String
+  vehicleId         String
+  vehicle           Vehicle  @relation(fields: [vehicleId], references: [id])
+  scheduledStart    DateTime
+  scheduledEnd      DateTime
+  chargingStation   String
+  targetChargeLevel Float
+  status            String
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model MaintenanceRecord {
+  id              String   @id @default(uuid())
+  title           String
+  vehicleId       String
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id])
+  maintenanceType String
+  scheduledDate   DateTime
+  completedDate   DateTime?
+  cost            Float?
+  status          String
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  title       String
+  reportType  String
+  startDate   DateTime
+  endDate     DateTime
+  generatedBy String?
+  user        User?    @relation(fields: [generatedBy], references: [id])
+  summary     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
