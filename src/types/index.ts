@@ -46,18 +46,21 @@ export interface MaintenanceRecord {
   notes?: string;
 }
 
+// Update your Report interface to include the dateRange property
 export interface Report {
   id: string;
   title: string;
   reportType: string;
-  dateRange: {
-    startDate: string;
-    endDate: string;
-  };
-  createdAt: string;
-  generatedBy?: {
+  startDate: string | Date;
+  endDate: string | Date;
+  generatedBy: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  summary?: string | null;
+  user?: {
+    id: string;
     firstName: string;
     lastName: string;
-  };
-  summary?: string;
+    email: string;
+  } | null;
 }
