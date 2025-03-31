@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Statistic, Progress, Table, Typography, Divider } from 'antd';
 import { CarOutlined, ThunderboltOutlined, ToolOutlined, ClockCircleOutlined, 
-         EnvironmentOutlined, DollarOutlined, CheckCircleOutlined } from '@ant-design/icons';
+         EnvironmentOutlined, DollarOutlined, CheckCircleOutlined, FileTextOutlined } from '@ant-design/icons';
 import AppLayout from '../../components/Layout';
 // Replace ant-design charts with recharts
 import { LineChart, Line as RechartsLine, PieChart, Pie as RechartsPie, BarChart, Bar, 
@@ -62,6 +62,45 @@ const DashboardPage: React.FC = () => {
 
     fetchPaperworkData();
   }, []);
+
+  // Generate heatmap data from paperwork records
+  const generateHeatmapData = () => {
+    const stages = [
+      'Purchase Documentation', 
+      'Registration', 
+      'Insurance Processing', 
+      'Tax Clearance',
+      'Emissions Testing', 
+      'Number Plate Issuance', 
+      'Telematics Setup', 
+      'Final Inspection',
+      'Driver Assignment', 
+      'Fleet Integration'
+    ];
+    
+    // Initialize counts for each stage
+    const stageCounts = stages.reduce((acc, stage) => {
+      acc[stage] = 0;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    // Count vehicles in each stage
+    paperworkProcessData.forEach(record => {
+      if (stageCounts[record.status] !== undefined) {
+        stageCounts[record.status]++;
+      }
+    });
+    
+    // Convert to array format for visualization
+    return stages.map(stage => ({
+      name: stage,
+      value: stageCounts[stage],
+      intensity: stageCounts[stage] > 0 ? 
+        (stageCounts[stage] > 2 ? 'high' : 'medium') : 'low'
+    }));
+  };
+  
+  const heatmapData = generateHeatmapData();
   
   // Mock data for dashboard
   const vehicleStats = {
@@ -427,16 +466,52 @@ const DashboardPage: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24}>
           <Card 
-            title="EV Acquisition & Paperwork Status" 
+            title={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <FileTextOutlined style={{ marginRight: 8 }} />
+                <span>EV Acquisition & Paperwork Status</span>
+              </div>
+            } 
             extra={<a href="/vehicle-onboarding">Manage Onboarding</a>}
           >
-            <Table 
-              dataSource={paperworkProcessData} 
-              columns={paperworkColumns} 
-              pagination={false}
-              rowKey="id"
-              loading={loading}
-            />
+            <div style={{ padding: '10px 0' }}>
+              <Text>Current vehicle distribution across onboarding stages:</Text>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
+              {heatmapData.map((item, index) => (
+                <div 
+                  key={index}
+                  style={{ 
+                    flex: '1 0 18%',
+                    minWidth: '150px',
+                    padding: '15px',
+                    borderRadius: '4px',
+                    backgroundColor: 
+                      item.intensity === 'high' ? '#f5222d20' : 
+                      item.intensity === 'medium' ? '#fa8c1620' : 
+                      '#f0f0f0',
+                    border: 
+                      item.intensity === 'high' ? '1px solid #f5222d' : 
+                      item.intensity === 'medium' ? '1px solid #fa8c16' : 
+                      '1px solid #d9d9d9',
+                    textAlign: 'center'
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{item.name}</div>
+                  <div style={{ 
+                    fontSize: '24px', 
+                    fontWeight: 'bold',
+                    color: 
+                      item.intensity === 'high' ? '#f5222d' : 
+                      item.intensity === 'medium' ? '#fa8c16' : 
+                      '#8c8c8c'
+                  }}>
+                    {item.value}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#8c8c8c' }}>vehicles</div>
+                </div>
+              ))}
+            </div>
           </Card>
         </Col>
       </Row>
