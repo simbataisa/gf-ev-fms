@@ -108,6 +108,118 @@ const DashboardPage: React.FC = () => {
     },
   ];
 
+  // Add new data for paperwork tracking
+  const paperworkProcessData = [
+    { 
+      id: 1, 
+      vehicleId: 'EV-025', 
+      status: 'Purchase Documentation', 
+      startDate: '2023-05-10', 
+      estimatedCompletion: '2023-05-25',
+      progress: 30,
+      assignedTo: 'John Smith',
+      nextStep: 'Vendor Payment Confirmation'
+    },
+    { 
+      id: 2, 
+      vehicleId: 'EV-026', 
+      status: 'Registration', 
+      startDate: '2023-05-05', 
+      estimatedCompletion: '2023-05-20',
+      progress: 65,
+      assignedTo: 'Maria Garcia',
+      nextStep: 'DMV Appointment'
+    },
+    { 
+      id: 3, 
+      vehicleId: 'EV-027', 
+      status: 'Number Plate Issuance', 
+      startDate: '2023-05-01', 
+      estimatedCompletion: '2023-05-15',
+      progress: 85,
+      assignedTo: 'Robert Chen',
+      nextStep: 'Plate Installation'
+    },
+    { 
+      id: 4, 
+      vehicleId: 'EV-028', 
+      status: 'Final Inspection', 
+      startDate: '2023-04-25', 
+      estimatedCompletion: '2023-05-12',
+      progress: 95,
+      assignedTo: 'Sarah Johnson',
+      nextStep: 'Fleet Onboarding'
+    }
+  ];
+
+  const paperworkColumns = [
+    {
+      title: 'Vehicle ID',
+      dataIndex: 'vehicleId',
+      key: 'vehicleId',
+    },
+    {
+      title: 'Current Stage',
+      dataIndex: 'status',
+      key: 'status',
+      render: (text: string) => {
+        const statusColors: Record<string, string> = {
+          'Purchase Documentation': '#1890ff',
+          'Registration': '#52c41a',
+          'Number Plate Issuance': '#faad14',
+          'Final Inspection': '#722ed1'
+        };
+        return (
+          <span style={{ 
+            color: 'white', 
+            backgroundColor: statusColors[text] || '#1890ff',
+            padding: '4px 8px',
+            borderRadius: '4px'
+          }}>
+            {text}
+          </span>
+        );
+      }
+    },
+    {
+      title: 'Assigned To',
+      dataIndex: 'assignedTo',
+      key: 'assignedTo',
+    },
+    {
+      title: 'Start Date',
+      dataIndex: 'startDate',
+      key: 'startDate',
+    },
+    {
+      title: 'Est. Completion',
+      dataIndex: 'estimatedCompletion',
+      key: 'estimatedCompletion',
+    },
+    {
+      title: 'Next Step',
+      dataIndex: 'nextStep',
+      key: 'nextStep',
+    },
+    {
+      title: 'Progress',
+      dataIndex: 'progress',
+      key: 'progress',
+      render: (progress: number) => (
+        <Progress percent={progress} size="small" status={progress >= 90 ? "success" : "active"} />
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_: any, record: any) => (
+        <a href={`/vehicle-onboarding/${record.vehicleId}`}>
+          {record.progress >= 95 ? 'Complete Onboarding' : 'View Details'}
+        </a>
+      ),
+    },
+  ];
+
   return (
     <AppLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -296,6 +408,22 @@ const DashboardPage: React.FC = () => {
             <Table 
               dataSource={recentActivities} 
               columns={activityColumns} 
+              pagination={false}
+              rowKey="id"
+            />
+          </Card>
+        </Col>
+      </Row>
+      
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24}>
+          <Card 
+            title="EV Acquisition & Paperwork Status" 
+            extra={<a href="/vehicle-onboarding">Manage Onboarding</a>}
+          >
+            <Table 
+              dataSource={paperworkProcessData} 
+              columns={paperworkColumns} 
               pagination={false}
               rowKey="id"
             />
