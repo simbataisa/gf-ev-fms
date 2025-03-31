@@ -290,6 +290,37 @@ const VehicleOnboardingPage: React.FC = () => {
       <Row gutter={[16, 16]}>
         <Col span={24}>
           <Card>
+            <Title level={4}>Onboarding Process Workflow</Title>
+            <div style={{ margin: '20px 0', overflow: 'auto' }}>
+              <div style={{ display: 'flex', minWidth: '900px' }}>
+                {['Purchase Documentation', 'Registration', 'Insurance Processing', 'Tax Clearance', 
+                  'Emissions Testing', 'Number Plate Issuance', 'Telematics Setup', 'Final Inspection', 
+                  'Driver Assignment', 'Fleet Integration'].map((stage, index) => (
+                  <div key={index} style={{ flex: 1, textAlign: 'center' }}>
+                    <div style={{ 
+                      padding: '10px', 
+                      margin: '0 5px', 
+                      background: '#f0f2f5', 
+                      borderRadius: '4px',
+                      position: 'relative'
+                    }}>
+                      <div style={{ fontWeight: 'bold' }}>{stage}</div>
+                      <div style={{ fontSize: '12px' }}>Stage {index + 1}</div>
+                      {index < 9 && (
+                        <div style={{ 
+                          position: 'absolute', 
+                          right: '-10px', 
+                          top: '50%', 
+                          transform: 'translateY(-50%)',
+                          zIndex: 1,
+                          color: '#1890ff'
+                        }}>→</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
             <Text>
               Manage the complete vehicle onboarding process from initial acquisition to operational readiness.
               Track paperwork status, assign responsibilities, and monitor progress.
@@ -337,6 +368,12 @@ const VehicleOnboardingPage: React.FC = () => {
               <Option value="Registration">Registration</Option>
               <Option value="Number Plate Issuance">Number Plate Issuance</Option>
               <Option value="Final Inspection">Final Inspection</Option>
+              <Option value="Insurance Processing">Insurance Processing</Option>
+              <Option value="Tax Clearance">Tax Clearance</Option>
+              <Option value="Emissions Testing">Emissions Testing</Option>
+              <Option value="Fleet Integration">Fleet Integration</Option>
+              <Option value="Driver Assignment">Driver Assignment</Option>
+              <Option value="Telematics Setup">Telematics Setup</Option>
             </Select>
           </Form.Item>
 
