@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Statistic, Progress, Table, Typography, Divider } from 'antd';
 import { CarOutlined, ThunderboltOutlined, ToolOutlined, ClockCircleOutlined, 
          EnvironmentOutlined, DollarOutlined, CheckCircleOutlined } from '@ant-design/icons';
@@ -9,7 +9,22 @@ import { LineChart, Line as RechartsLine, PieChart, Pie as RechartsPie, BarChart
 
 const { Title, Text } = Typography;
 
+// Define the paperwork record type
+interface PaperworkRecord {
+  id: number;
+  vehicleId: string;
+  status: string;
+  startDate: string;
+  estimatedCompletion: string;
+  progress: number;
+  assignedTo: string;
+  nextStep: string;
+}
+
 const DashboardPage: React.FC = () => {
+  // Add loading state
+  const [loading, setLoading] = useState(false);
+  
   // Mock data for dashboard
   const vehicleStats = {
     total: 24,
@@ -426,6 +441,7 @@ const DashboardPage: React.FC = () => {
               columns={paperworkColumns} 
               pagination={false}
               rowKey="id"
+              loading={loading}
             />
           </Card>
         </Col>
