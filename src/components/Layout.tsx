@@ -66,6 +66,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <Menu.Item key="/maintenance" icon={<ToolOutlined />}>
             <Link href="/maintenance">Maintenance</Link>
           </Menu.Item>
+          <Menu.Item key="/vehicle-onboarding" icon={<FileTextOutlined />}>
+            <Link href="/vehicle-onboarding">Paperwork & Onboarding</Link>
+          </Menu.Item>
           <Menu.Item key="/reports" icon={<FileTextOutlined />}>
             <Link href="/reports">Reports</Link>
           </Menu.Item>
