@@ -156,6 +156,86 @@ async function main() {
     console.log(`Report created: ${report.title}`);
   }
   
+  // Create paperwork records for vehicle onboarding
+  const paperworkStatuses = [
+    'Purchase Documentation', 
+    'Registration', 
+    'Insurance Processing', 
+    'Tax Clearance',
+    'Emissions Testing', 
+    'Number Plate Issuance', 
+    'Telematics Setup', 
+    'Final Inspection',
+    'Driver Assignment', 
+    'Fleet Integration'
+  ];
+  
+  const assignees = [
+    'John Smith',
+    'Maria Garcia',
+    'Robert Chen',
+    'Sarah Johnson',
+    'David Wilson',
+    'Emily Brown',
+    'Michael Lee',
+    'Jessica Martinez'
+  ];
+  
+  const nextSteps = [
+    'Vendor Payment Confirmation',
+    'DMV Appointment',
+    'Policy Approval',
+    'Tax Certificate',
+    'Test Results Review',
+    'Plate Installation',
+    'System Testing',
+    'Fleet Onboarding',
+    'Driver Training',
+    'Final Documentation'
+  ];
+  
+  // Create paperwork records for some vehicles
+  for (let i = 0; i < Math.min(dummyCount, 8); i++) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - (10 + i * 5)); // Stagger start dates
+    
+    const estimatedCompletion = new Date(startDate);
+    estimatedCompletion.setDate(startDate.getDate() + 15); // 15 days to complete
+    
+    // Calculate progress based on time elapsed
+    const today = new Date();
+    const totalDays = 15;
+    const daysElapsed = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    let progress = Math.min(Math.floor((daysElapsed / totalDays) * 100), 95);
+    
+    // Randomize progress a bit
+    progress = Math.max(10, Math.min(95, progress + (Math.floor(Math.random() * 20) - 10)));
+    
+    // Select status based on progress
+    const statusIndex = Math.floor((progress / 100) * paperworkStatuses.length);
+    const status = paperworkStatuses[Math.min(statusIndex, paperworkStatuses.length - 1)];
+    
+    // Select next step based on status
+    const nextStepIndex = paperworkStatuses.indexOf(status);
+    const nextStep = nextStepIndex < paperworkStatuses.length - 1 
+      ? `Prepare for ${paperworkStatuses[nextStepIndex + 1]}` 
+      : nextSteps[Math.floor(Math.random() * nextSteps.length)];
+    
+    const paperwork = await prisma.paperwork.create({
+      data: {
+        vehicleId: `EV-${1000 + i}`,
+        status,
+        startDate,
+        estimatedCompletion,
+        progress,
+        assignedTo: assignees[i % assignees.length],
+        nextStep,
+      },
+    });
+    
+    console.log(`Paperwork record created for ${paperwork.vehicleId} (${status}) - ${progress}% complete`);
+  }
+  
   console.log('Database seeding completed!');
 }
 
