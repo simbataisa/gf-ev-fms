@@ -113,15 +113,9 @@ const DashboardPage: React.FC = () => {
     xField: 'month',
     yField: 'consumption',
     point: {
-      size: 5,
-      // Remove the shape property that's causing issues
-      // shape: 'diamond',
+      size: 4
     },
-    label: {
-      style: {
-        fill: '#aaa',
-      },
-    },
+    smooth: true
   };
 
   // Config for vehicle status pie chart
@@ -131,12 +125,10 @@ const DashboardPage: React.FC = () => {
     angleField: 'value',
     colorField: 'type',
     radius: 0.8,
-    label: {
-      // Change from 'outer' to 'outer-center' which is supported
-      type: 'outer-center',
-      content: '{name} {percentage}',
-    },
-    interactions: [{ type: 'pie-legend-active' }, { type: 'element-active' }],
+    // Simplify label configuration
+    legend: {
+      position: 'bottom'
+    }
   };
 
   // Config for maintenance cost column chart
@@ -145,19 +137,12 @@ const DashboardPage: React.FC = () => {
     height: 250,
     xField: 'type',
     yField: 'cost',
-    label: {
-      // Change from 'middle' to 'top' which is supported
-      position: 'top',
-      style: {
-        fill: '#000000',
-        opacity: 0.6,
-      },
-    },
+    // Remove label configuration that's causing issues
     meta: {
       cost: {
-        alias: 'Cost ($)',
-      },
-    },
+        alias: 'Cost ($)'
+      }
+    }
   };
 
   return (
@@ -195,7 +180,7 @@ const DashboardPage: React.FC = () => {
             />
             <div style={{ marginTop: 16 }}>
               <Progress 
-                percent={(chargingStats.inProgress / (chargingStats.scheduled + chargingStats.inProgress)) * 100} 
+                percent={Math.round((chargingStats.inProgress / (chargingStats.scheduled + chargingStats.inProgress)) * 100)} 
                 size="small"
               />
             </div>

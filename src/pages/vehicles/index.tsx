@@ -213,6 +213,105 @@ const VehiclesPage: React.FC = () => {
       />
       
       {/* Modal form for adding/editing vehicles */}
+      <Modal
+        title={editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}
+        visible={isModalVisible}
+        onCancel={handleCancel}
+        onOk={handleSubmit}
+        confirmLoading={createVehicleMutation.isLoading || updateVehicleMutation.isLoading}
+        width={600}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+        >
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: 'Please enter vehicle name' }]}
+          >
+            <input className="ant-input" />
+          </Form.Item>
+          
+          <Form.Item
+            name="model"
+            label="Model"
+            rules={[{ required: true, message: 'Please enter vehicle model' }]}
+          >
+            <input className="ant-input" />
+          </Form.Item>
+          
+          <Form.Item
+            name="manufacturer"
+            label="Manufacturer"
+            rules={[{ required: true, message: 'Please enter manufacturer' }]}
+          >
+            <input className="ant-input" />
+          </Form.Item>
+          
+          <Form.Item
+            name="year"
+            label="Year"
+            rules={[{ required: true, message: 'Please enter year' }]}
+          >
+            <input type="number" className="ant-input" />
+          </Form.Item>
+          
+          <Form.Item
+            name="licensePlate"
+            label="License Plate"
+            rules={[{ required: true, message: 'Please enter license plate' }]}
+          >
+            <input className="ant-input" />
+          </Form.Item>
+          
+          <Form.Item
+            name="vin"
+            label="VIN"
+            rules={[{ required: true, message: 'Please enter VIN' }]}
+          >
+            <input className="ant-input" />
+          </Form.Item>
+          
+          <Form.Item
+            name="batteryCapacity"
+            label="Battery Capacity (kWh)"
+            rules={[{ required: true, message: 'Please enter battery capacity' }]}
+          >
+            <input type="number" className="ant-input" />
+          </Form.Item>
+          
+          <Form.Item
+            name="range"
+            label="Range (km)"
+            rules={[{ required: true, message: 'Please enter range' }]}
+          >
+            <input type="number" className="ant-input" />
+          </Form.Item>
+          
+          <Form.Item
+            name="status"
+            label="Status"
+            rules={[{ required: true, message: 'Please select status' }]}
+          >
+            <select className="ant-select-selector" style={{ width: '100%', height: '32px' }}>
+              <option value="available">Available</option>
+              <option value="in-use">In Use</option>
+              <option value="charging">Charging</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="out-of-service">Out of Service</option>
+            </select>
+          </Form.Item>
+          
+          <Form.Item
+            name="currentCharge"
+            label="Current Charge (%)"
+            rules={[{ required: true, message: 'Please enter current charge' }]}
+          >
+            <input type="number" min="0" max="100" className="ant-input" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </AppLayout>
   );
 };
