@@ -3,7 +3,9 @@ import { Row, Col, Card, Statistic, Progress, Table, Typography, Divider } from 
 import { CarOutlined, ThunderboltOutlined, ToolOutlined, ClockCircleOutlined, 
          EnvironmentOutlined, DollarOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import AppLayout from '../../components/Layout';
-import { Line, Pie, Column } from '@ant-design/charts';
+// Replace ant-design charts with recharts
+import { LineChart, Line as RechartsLine, PieChart, Pie as RechartsPie, BarChart, Bar, 
+         XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const { Title, Text } = Typography;
 
@@ -106,45 +108,6 @@ const DashboardPage: React.FC = () => {
     },
   ];
 
-  // Config for energy consumption line chart
-  const lineConfig = {
-    data: energyData,
-    height: 250,
-    xField: 'month',
-    yField: 'consumption',
-    point: {
-      size: 4
-    },
-    smooth: true
-  };
-
-  // Config for vehicle status pie chart
-  const pieConfig = {
-    data: vehicleStatusData,
-    height: 250,
-    angleField: 'value',
-    colorField: 'type',
-    radius: 0.8,
-    // Simplify label configuration
-    legend: {
-      position: 'bottom'
-    }
-  };
-
-  // Config for maintenance cost column chart
-  const columnConfig = {
-    data: maintenanceCostData,
-    height: 250,
-    xField: 'type',
-    yField: 'cost',
-    // Remove label configuration that's causing issues
-    meta: {
-      cost: {
-        alias: 'Cost ($)'
-      }
-    }
-  };
-
   return (
     <AppLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -197,7 +160,7 @@ const DashboardPage: React.FC = () => {
             />
             <div style={{ marginTop: 16 }}>
               <Progress 
-                percent={(maintenanceStats.inProgress / (maintenanceStats.scheduled + maintenanceStats.inProgress)) * 100} 
+                percent={Math.round((maintenanceStats.inProgress / (maintenanceStats.scheduled + maintenanceStats.inProgress)) * 100)} 
                 size="small"
                 status="active"
               />
@@ -223,12 +186,41 @@ const DashboardPage: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={12}>
           <Card title="Monthly Energy Consumption (kWh)">
-            <Line {...lineConfig} />
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={energyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <RechartsLine 
+                  type="monotone" 
+                  dataKey="consumption" 
+                  stroke="#8884d8" 
+                  activeDot={{ r: 8 }} 
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
         <Col xs={24} lg={12}>
           <Card title="Vehicle Status Distribution">
-            <Pie {...pieConfig} />
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <RechartsPie
+                  data={vehicleStatusData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="type"
+                  label
+                />
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
       </Row>
@@ -236,7 +228,16 @@ const DashboardPage: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={16}>
           <Card title="Maintenance Costs by Category">
-            <Column {...columnConfig} />
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={maintenanceCostData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="type" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="cost" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
         <Col xs={24} lg={8}>
