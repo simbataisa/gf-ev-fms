@@ -100,3 +100,37 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 };
 
 export default AppLayout;
+
+// In the menu items section
+const items = [
+  {
+    key: '1',
+    icon: <DashboardOutlined />,
+    label: <Link href="/">Dashboard</Link>,
+  },
+  {
+    key: '2',
+    icon: <CarOutlined />,
+    label: <Link href="/fleet-management">Fleet Management</Link>,
+  },
+  {
+    key: '3',
+    icon: <ToolOutlined />,
+    label: <Link href="/maintenance">Maintenance</Link>,
+  },
+  {
+    key: '4',
+    icon: <FileTextOutlined />,
+    label: <Link href="/vehicle-onboarding">Vehicle Onboarding</Link>,
+  },
+  {
+    key: '5',
+    icon: <UserOutlined />,
+    label: <Link href="/driver-management">Driver Management</Link>,
+  },
+  {
+    key: '6',
+    icon: <ThunderboltOutlined />,
+    label: <Link href="/vehicle-tracking">Vehicle Tracking</Link>,
+  },
+];
