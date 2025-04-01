@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { GoogleMap, useLoadScript, MarkerF, InfoWindowF, OverlayView } from "@react-google-maps/api";
+import { GoogleMap, useLoadScript, MarkerF, InfoWindowF } from "@react-google-maps/api";
 
 import { 
-  Typography, Card, Row, Col, Table, Tag, Button, Space, Statistic, 
-  Modal, Spin, Switch, Divider
+  Typography, Card, Row, Col, Table, Tag, Button, Space, 
+  Modal
 } from 'antd';
 import { 
-  CarOutlined, EnvironmentOutlined, DashboardOutlined, 
-  ThunderboltOutlined, LockOutlined, UnlockOutlined, 
-  StopOutlined, ReloadOutlined,
-  ExclamationCircleOutlined
+  CarOutlined, ThunderboltOutlined, LockOutlined, UnlockOutlined, 
+  StopOutlined, ReloadOutlined, ExclamationCircleOutlined
 } from '@ant-design/icons';
-import AppLayout from '../../components/Layout';
+import VehicleTrackingDetails from '../../components/VehicleTrackingDetails';
+import AppLayout from '@/components/Layout';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { confirm } = Modal;
 
 // Define vehicle tracking interface
@@ -142,10 +141,13 @@ const VehicleTrackingPage: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  const [modalVisible, setModalVisible] = useState(false);
+
   // Handle vehicle selection
   const handleSelectVehicle = (vehicle: VehicleTrackingData) => {
     setSelectedVehicle(vehicle);
     setMapLoading(true);
+    setModalVisible(true);
     // Simulate map loading
     setTimeout(() => setMapLoading(false), 1000);
   };
@@ -210,82 +212,129 @@ const VehicleTrackingPage: React.FC = () => {
     });
   };
 
-  // Table columns
-  const columns = [
-    {
-      title: 'Vehicle',
-      dataIndex: 'name',
-      key: 'name',
-      render: (text: string, record: VehicleTrackingData) => (
-        <a onClick={() => handleSelectVehicle(record)}>{text}</a>
-      )
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => {
-        let color = 'green';
-        if (status === 'Inactive') color = 'volcano';
-        else if (status === 'Charging') color = 'blue';
-        return <Tag color={color}>{status}</Tag>;
+  // Add a state to track screen size
+  const [screenSize, setScreenSize] = useState<'small' | 'medium' | 'large'>('large');
+
+  // Add effect to detect screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 576) {
+        setScreenSize('small');
+      } else if (window.innerWidth < 992) {
+        setScreenSize('medium');
+      } else {
+        setScreenSize('large');
       }
-    },
-    {
-      title: 'Battery',
-      dataIndex: 'batteryLevel',
-      key: 'batteryLevel',
-      render: (level: number) => {
-        let color = 'success';
-        if (level < 20) color = 'error';
-        else if (level < 50) color = 'warning';
-        return (
-          <Space>
-            <ThunderboltOutlined /> 
-            <span style={{ color: level < 20 ? 'red' : level < 50 ? 'orange' : 'green' }}>
-              {level}%
-            </span>
-          </Space>
-        );
+    };
+    
+    // Set initial size
+    handleResize();
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Table columns with responsive adjustments
+  const getResponsiveColumns = () => {
+    const baseColumns = [
+      {
+        title: 'Vehicle',
+        dataIndex: 'name',
+        key: 'name',
+        render: (text: string, record: VehicleTrackingData) => (
+          <a onClick={() => handleSelectVehicle(record)}>{text}</a>
+        )
+      },
+      {
+        title: 'Status',
+        dataIndex: 'status',
+        key: 'status',
+        render: (status: string) => {
+          let color = 'green';
+          if (status === 'Inactive') color = 'volcano';
+          else if (status === 'Charging') color = 'blue';
+          return <Tag color={color}>{status}</Tag>;
+        }
+      },
+      {
+        title: 'Battery',
+        dataIndex: 'batteryLevel',
+        key: 'batteryLevel',
+        render: (level: number) => {
+          let color = 'success';
+          if (level < 20) color = 'error';
+          else if (level < 50) color = 'warning';
+          return (
+            <Space>
+              <ThunderboltOutlined /> 
+              <span style={{ color: level < 20 ? 'red' : level < 50 ? 'orange' : 'green' }}>
+                {level}%
+              </span>
+            </Space>
+          );
+        }
       }
-    },
-    {
-      title: 'Location',
-      dataIndex: ['location', 'address'],
-      key: 'location',
-      ellipsis: true,
-    },
-    {
-      title: 'Driver',
-      dataIndex: 'driver',
-      key: 'driver',
-    },
-    {
-      title: 'Controls',
-      key: 'controls',
-      render: (_: any, record: VehicleTrackingData) => (
-        <Space size="small">
-          <Button 
-            type={record.isLocked ? "primary" : "default"}
-            icon={record.isLocked ? <LockOutlined /> : <UnlockOutlined />}
-            size="small"
-            onClick={() => handleLockToggle(record.id, record.isLocked)}
-          >
-            {record.isLocked ? "Locked" : "Unlocked"}
-          </Button>
-          <Button 
-            type={record.isChargingEnabled ? "primary" : "default"}
-            danger={!record.isChargingEnabled}
-            icon={record.isChargingEnabled ? <ThunderboltOutlined /> : <StopOutlined />}
-            size="small"
-            onClick={() => handleChargingToggle(record.id, record.isChargingEnabled)}
-          >
-            {record.isChargingEnabled ? "Charging Enabled" : "Charging Disabled"}
-          </Button>
-        </Space>
-      )
+    ];
+
+    // Add more columns for medium and large screens
+    if (screenSize === 'medium' || screenSize === 'large') {
+      baseColumns.push(
+        {
+          title: 'Location',
+          dataIndex: ['location', 'address'],
+          key: 'location',
+          ellipsis: true,
+        }
+      );
     }
-  ];
+
+    // Add even more columns for large screens
+    if (screenSize === 'large') {
+      baseColumns.push(
+        {
+          title: 'Driver',
+          dataIndex: 'driver',
+          key: 'driver',
+        },
+        {
+          title: 'Controls',
+          key: 'controls',
+          render: (_: any, record: VehicleTrackingData) => (
+            <Space size="small">
+              <Button 
+                type={record.isLocked ? "primary" : "default"}
+                icon={record.isLocked ? <LockOutlined /> : <UnlockOutlined />}
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLockToggle(record.id, record.isLocked);
+                }}
+              >
+                {record.isLocked ? "Locked" : "Unlocked"}
+              </Button>
+              <Button 
+                type={record.isChargingEnabled ? "primary" : "default"}
+                danger={!record.isChargingEnabled}
+                icon={record.isChargingEnabled ? <ThunderboltOutlined /> : <StopOutlined />}
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleChargingToggle(record.id, record.isChargingEnabled);
+                }}
+              >
+                {record.isChargingEnabled ? "Charging Enabled" : "Charging Disabled"}
+              </Button>
+            </Space>
+          )
+        }
+      );
+    }
+
+    return baseColumns;
+  };
 
   return (
     <AppLayout>
@@ -303,148 +352,36 @@ const VehicleTrackingPage: React.FC = () => {
       </div>
 
       <Row gutter={[16, 16]}>
-        <Col xs={24} lg={16}>
+        <Col xs={24}>
           <Card title="Vehicle Fleet Status" loading={loading}>
             <Table 
               dataSource={vehicles} 
-              columns={columns} 
+              columns={getResponsiveColumns()} 
               rowKey="id"
               pagination={false}
               onRow={(record) => ({
                 onClick: () => handleSelectVehicle(record),
                 style: { cursor: 'pointer' }
               })}
+              scroll={{ x: 'max-content' }}
             />
           </Card>
         </Col>
-        
-        <Col xs={24} lg={8}>
-          <Card 
-            title={selectedVehicle ? `${selectedVehicle.name} Details` : "Select a Vehicle"} 
-            style={{ marginBottom: 16 }}
-          >
-            {selectedVehicle ? (
-              <>
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <Statistic 
-                      title="Battery Level" 
-                      value={selectedVehicle.batteryLevel} 
-                      suffix="%" 
-                      valueStyle={{ color: selectedVehicle.batteryLevel < 20 ? 'red' : selectedVehicle.batteryLevel < 50 ? 'orange' : 'green' }}
-                      prefix={<ThunderboltOutlined />} 
-                    />
-                  </Col>
-                  <Col span={12}>
-                    <Statistic 
-                      title="Odometer" 
-                      value={selectedVehicle.odometer} 
-                      suffix="km" 
-                      prefix={<DashboardOutlined />} 
-                    />
-                  </Col>
-                </Row>
-                
-                <Divider />
-                
-                <div style={{ marginBottom: 16 }}>
-                  <Text strong>Current Location:</Text>
-                  <div style={{ marginTop: 8 }}>
-                    <EnvironmentOutlined /> {selectedVehicle.location.address}
-                  </div>
-                  <div style={{ marginTop: 4, fontSize: '12px', color: 'rgba(0, 0, 0, 0.45)' }}>
-                    Last updated: {new Date(selectedVehicle.location.lastUpdated).toLocaleString()}
-                  </div>
-                </div>
-                
-                <Divider />
-                
-                <div style={{ marginBottom: 16 }}>
-                  <Text strong>Remote Controls:</Text>
-                  <div style={{ marginTop: 12 }}>
-                    <Space direction="vertical" style={{ width: '100%' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text>Lock/Unlock Vehicle:</Text>
-                        <Switch 
-                          checked={selectedVehicle.isLocked}
-                          onChange={() => handleLockToggle(selectedVehicle.id, selectedVehicle.isLocked)}
-                          checkedChildren={<LockOutlined />}
-                          unCheckedChildren={<UnlockOutlined />}
-                        />
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text>Enable/Disable Charging:</Text>
-                        <Switch 
-                          checked={selectedVehicle.isChargingEnabled}
-                          onChange={() => handleChargingToggle(selectedVehicle.id, selectedVehicle.isChargingEnabled)}
-                          checkedChildren={<ThunderboltOutlined />}
-                          unCheckedChildren={<StopOutlined />}
-                        />
-                      </div>
-                    </Space>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                <CarOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
-                <p style={{ marginTop: 16 }}>Select a vehicle from the table to view details and controls</p>
-              </div>
-            )}
-          </Card>
-          
-          <Card title="GPS Location" style={{ height: 300 }}>
-            {selectedVehicle ? (
-              mapLoading ? (
-                <div style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <Spin tip="Loading map..." />
-                </div>
-              ) : (
-                <div style={{ height: '220px', width: '100%' }}>
-                  {isLoaded ? (
-                    <GoogleMap
-                      mapContainerStyle={{ height: '100%', width: '100%' }}
-                      center={{
-                        lat: selectedVehicle.location.latitude,
-                        lng: selectedVehicle.location.longitude
-                      }}
-                      zoom={15}
-                      onLoad={onLoad}
-                      onUnmount={onUnmount}
-                    >
-                      <MarkerF
-                        position={{
-                          lat: selectedVehicle.location.latitude,
-                          lng: selectedVehicle.location.longitude
-                        }}
-                        onClick={() => setActiveMarker(selectedVehicle.id)}
-                      >
-                        {activeMarker === selectedVehicle.id && (
-                          <InfoWindowF onCloseClick={() => setActiveMarker(null)}>
-                            <div>
-                              <h3>{selectedVehicle.name}</h3>
-                              <p>{selectedVehicle.location.address}</p>
-                              <p>Battery: {selectedVehicle.batteryLevel}%</p>
-                            </div>
-                          </InfoWindowF>
-                        )}
-                      </MarkerF>
-                    </GoogleMap>
-                  ) : (
-                    <div style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <Text type="warning">Google Maps API not loaded. Check your API key.</Text>
-                    </div>
-                  )}
-                </div>
-              )
-            ) : (
-              <div style={{ height: '220px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Text type="secondary">Select a vehicle to view its location</Text>
-              </div>
-            )}
-          </Card>
-        </Col>
       </Row>
+
+      <VehicleTrackingDetails
+        vehicle={selectedVehicle}
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        handleLockToggle={handleLockToggle}
+        handleChargingToggle={handleChargingToggle}
+        mapLoading={mapLoading}
+        isLoaded={isLoaded}
+        onLoad={onLoad}
+        onUnmount={onUnmount}
+        activeMarker={activeMarker}
+        setActiveMarker={setActiveMarker}
+      />
     </AppLayout>
   );
 };
