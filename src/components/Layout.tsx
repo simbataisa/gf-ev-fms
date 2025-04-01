@@ -41,6 +41,51 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     </Menu>
   );
 
+  // Define menu items
+  const items = [
+    {
+      key: '/',
+      icon: <DashboardOutlined />,
+      label: <Link href="/">Dashboard</Link>,
+    },
+    {
+      key: '/vehicles',
+      icon: <CarOutlined />,
+      label: <Link href="/vehicles">Vehicles</Link>,
+    },
+
+    {
+      key: '/vehicle-onboarding',
+      icon: <FileTextOutlined />,
+      label: <Link href="/vehicle-onboarding">Vehicle Onboarding</Link>,
+    },
+    {
+      key: '/charging',
+      icon: <ThunderboltOutlined />,
+      label: <Link href="/charging">Charging</Link>,
+    },
+    {
+      key: '/maintenance',
+      icon: <ToolOutlined />,
+      label: <Link href="/maintenance">Maintenance</Link>,
+    },
+    {
+      key: '/vehicle-tracking',
+      icon: <ThunderboltOutlined />,
+      label: <Link href="/vehicle-tracking">Vehicle Tracking</Link>,
+    },
+    {
+      key: '/reports',
+      icon: <FileTextOutlined />,
+      label: <Link href="/reports">Reports</Link>,
+    },
+    {
+      key: '/users',
+      icon: <UserOutlined />,
+      label: <Link href="/users">Users</Link>,
+    },
+  ];
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider trigger={null} collapsible collapsed={collapsed} width={250}>
@@ -53,29 +98,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           theme="dark"
           mode="inline"
           selectedKeys={[router.pathname]}
-        >
-          <Menu.Item key="/dashboard" icon={<DashboardOutlined />}>
-            <Link href="/dashboard">Dashboard</Link>
-          </Menu.Item>
-          <Menu.Item key="/vehicles" icon={<CarOutlined />}>
-            <Link href="/vehicles">Vehicles</Link>
-          </Menu.Item>
-          <Menu.Item key="/charging" icon={<ThunderboltOutlined />}>
-            <Link href="/charging">Charging</Link>
-          </Menu.Item>
-          <Menu.Item key="/maintenance" icon={<ToolOutlined />}>
-            <Link href="/maintenance">Maintenance</Link>
-          </Menu.Item>
-          <Menu.Item key="/vehicle-onboarding" icon={<FileTextOutlined />}>
-            <Link href="/vehicle-onboarding">Paperwork & Onboarding</Link>
-          </Menu.Item>
-          <Menu.Item key="/reports" icon={<FileTextOutlined />}>
-            <Link href="/reports">Reports</Link>
-          </Menu.Item>
-          <Menu.Item key="/users" icon={<UserOutlined />}>
-            <Link href="/users">Users</Link>
-          </Menu.Item>
-        </Menu>
+          items={items}
+        />
       </Sider>
       <Layout>
         <Header style={{ background: '#fff', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -100,37 +124,3 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 };
 
 export default AppLayout;
-
-// In the menu items section
-const items = [
-  {
-    key: '1',
-    icon: <DashboardOutlined />,
-    label: <Link href="/">Dashboard</Link>,
-  },
-  {
-    key: '2',
-    icon: <CarOutlined />,
-    label: <Link href="/fleet-management">Fleet Management</Link>,
-  },
-  {
-    key: '3',
-    icon: <ToolOutlined />,
-    label: <Link href="/maintenance">Maintenance</Link>,
-  },
-  {
-    key: '4',
-    icon: <FileTextOutlined />,
-    label: <Link href="/vehicle-onboarding">Vehicle Onboarding</Link>,
-  },
-  {
-    key: '5',
-    icon: <UserOutlined />,
-    label: <Link href="/driver-management">Driver Management</Link>,
-  },
-  {
-    key: '6',
-    icon: <ThunderboltOutlined />,
-    label: <Link href="/vehicle-tracking">Vehicle Tracking</Link>,
-  },
-];
