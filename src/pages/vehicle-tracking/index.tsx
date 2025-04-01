@@ -12,6 +12,8 @@ import {
 import VehicleTrackingDetails from '../../components/VehicleTrackingDetails';
 import AppLayout from '@/components/Layout';
 
+import type { ColumnType } from 'antd/es/table';
+
 const { Title } = Typography;
 const { confirm } = Modal;
 
@@ -238,103 +240,92 @@ const VehicleTrackingPage: React.FC = () => {
   }, []);
 
   // Table columns with responsive adjustments
-  const getResponsiveColumns = () => {
-    const baseColumns = [
-      {
-        title: 'Vehicle',
-        dataIndex: 'name',
-        key: 'name',
-        render: (text: string, record: VehicleTrackingData) => (
-          <a onClick={() => handleSelectVehicle(record)}>{text}</a>
-        )
-      },
-      {
-        title: 'Status',
-        dataIndex: 'status',
-        key: 'status',
-        render: (status: string) => {
-          let color = 'green';
-          if (status === 'Inactive') color = 'volcano';
-          else if (status === 'Charging') color = 'blue';
-          return <Tag color={color}>{status}</Tag>;
-        }
-      },
-      {
-        title: 'Battery',
-        dataIndex: 'batteryLevel',
-        key: 'batteryLevel',
-        render: (level: number) => {
-          let color = 'success';
-          if (level < 20) color = 'error';
-          else if (level < 50) color = 'warning';
-          return (
-            <Space>
-              <ThunderboltOutlined /> 
-              <span style={{ color: level < 20 ? 'red' : level < 50 ? 'orange' : 'green' }}>
-                {level}%
-              </span>
-            </Space>
-          );
-        }
+  // Table columns with proper typing
+  const columns: ColumnType<VehicleTrackingData>[] = [
+    {
+      title: 'Vehicle',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string, record: VehicleTrackingData) => (
+        <a onClick={() => handleSelectVehicle(record)}>{text}</a>
+      )
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => {
+        let color = 'green';
+        if (status === 'Inactive') color = 'volcano';
+        else if (status === 'Charging') color = 'blue';
+        return <Tag color={color}>{status}</Tag>;
       }
-    ];
-
-    // Add more columns for medium and large screens
-    if (screenSize === 'medium' || screenSize === 'large') {
-      baseColumns.push(
-        {
-          title: 'Location',
-          dataIndex: ['location', 'address'],
-          key: 'location',
-          ellipsis: true,
-        }
-      );
+    },
+    {
+      title: 'Battery',
+      dataIndex: 'batteryLevel',
+      key: 'batteryLevel',
+      render: (level: number) => {
+        let color = 'success';
+        if (level < 20) color = 'error';
+        else if (level < 50) color = 'warning';
+        return (
+          <Space>
+            <ThunderboltOutlined /> 
+            <span style={{ color: level < 20 ? 'red' : level < 50 ? 'orange' : 'green' }}>
+              {level}%
+            </span>
+          </Space>
+        );
+      }
+    },
+    {
+      title: 'Location',
+      dataIndex: 'location',
+      key: 'location',
+      ellipsis: true,
+      responsive: ['md', 'lg', 'xl'],
+      render: (location: VehicleTrackingData['location']) => location.address
+    },
+    {
+      title: 'Driver',
+      dataIndex: 'driver',
+      key: 'driver',
+      responsive: ['lg', 'xl'],
+    },
+    {
+      title: 'Controls',
+      key: 'controls',
+      responsive: ['lg', 'xl'],
+      render: (_: any, record: VehicleTrackingData) => (
+        <Space size="small">
+          <Button 
+            type={record.isLocked ? "primary" : "default"}
+            icon={record.isLocked ? <LockOutlined /> : <UnlockOutlined />}
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleLockToggle(record.id, record.isLocked);
+            }}
+          >
+            {record.isLocked ? "Locked" : "Unlocked"}
+          </Button>
+          <Button 
+            type={record.isChargingEnabled ? "primary" : "default"}
+            danger={!record.isChargingEnabled}
+            icon={record.isChargingEnabled ? <ThunderboltOutlined /> : <StopOutlined />}
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleChargingToggle(record.id, record.isChargingEnabled);
+            }}
+          >
+            {record.isChargingEnabled ? "Charging Enabled" : "Charging Disabled"}
+          </Button>
+        </Space>
+      )
     }
-
-    // Add even more columns for large screens
-    if (screenSize === 'large') {
-      baseColumns.push(
-        {
-          title: 'Driver',
-          dataIndex: 'driver',
-          key: 'driver',
-        },
-        {
-          title: 'Controls',
-          key: 'controls',
-          render: (_: any, record: VehicleTrackingData) => (
-            <Space size="small">
-              <Button 
-                type={record.isLocked ? "primary" : "default"}
-                icon={record.isLocked ? <LockOutlined /> : <UnlockOutlined />}
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleLockToggle(record.id, record.isLocked);
-                }}
-              >
-                {record.isLocked ? "Locked" : "Unlocked"}
-              </Button>
-              <Button 
-                type={record.isChargingEnabled ? "primary" : "default"}
-                danger={!record.isChargingEnabled}
-                icon={record.isChargingEnabled ? <ThunderboltOutlined /> : <StopOutlined />}
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleChargingToggle(record.id, record.isChargingEnabled);
-                }}
-              >
-                {record.isChargingEnabled ? "Charging Enabled" : "Charging Disabled"}
-              </Button>
-            </Space>
-          )
-        }
-      );
-    }
-
-    return baseColumns;
-  };
+  ];
 
   return (
     <AppLayout>
@@ -356,7 +347,7 @@ const VehicleTrackingPage: React.FC = () => {
           <Card title="Vehicle Fleet Status" loading={loading}>
             <Table 
               dataSource={vehicles} 
-              columns={getResponsiveColumns()} 
+              columns={columns} 
               rowKey="id"
               pagination={false}
               onRow={(record) => ({
