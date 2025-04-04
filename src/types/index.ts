@@ -64,3 +64,19 @@ export interface Report {
     email: string;
   } | null;
 }
+
+export interface Driver {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  licenseNumber: string;
+  licenseExpiry: string;
+  status: 'available' | 'on_duty' | 'on_leave' | 'inactive';
+  rating: number;
+  address: string;
+  joinDate: string;
+  currentVehicle: string | null;
+  totalTrips: number;
+  avatar?: string;
+}

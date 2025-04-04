@@ -60,6 +60,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       label: <Link href="/orders">Order Management</Link>,
     },
     {
+      key: '/drivers',
+      icon: <UserOutlined />,
+      label: <Link href="/drivers">Drivers</Link>,
+    },
+    {
       key: '/vehicle-onboarding',
       icon: <FileTextOutlined />,
       label: <Link href="/vehicle-onboarding">Vehicle Onboarding</Link>,

@@ -18,23 +18,20 @@ import {
   Tabs,
   Statistic,
   Progress,
-  Empty
+  Empty,
+  message
 } from 'antd';
 import { PlusOutlined, SearchOutlined, CalendarOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import AppLayout from '../../components/Layout';
 import type { NextPage } from 'next';
 import type { Moment } from 'moment';
 import moment from 'moment';
+import { driversApi } from '../../services/driversApi';
+import { Driver } from '../../types/index';
 
 const { Title } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
-
-interface Driver {
-  id: string;
-  name: string;
-  available: boolean;
-}
 
 interface Order {
   id: string;
@@ -221,27 +218,18 @@ const OrderManagement: NextPage = () => {
         driverId: '4'
       }
     ];
-    
-    const mockDrivers = [
-      { id: '1', name: 'Nguyễn Văn An', available: true },
-      { id: '2', name: 'Trần Thị Bình', available: true },
-      { id: '3', name: 'Lê Hoàng Cường', available: false },
-      { id: '4', name: 'Phạm Minh Đức', available: true },
-      { id: '5', name: 'Vũ Thị Hoa', available: true }
-    ];
 
-    setOrders(mockOrders);
-    setFilteredOrders(mockOrders);
-    setDrivers(mockDrivers);
     
-    // In a real application, you would fetch from your API:
-    // fetch('/api/orders')
-    //   .then(response => response.json())
-    //   .then(data => setOrders(data));
-    
-    // fetch('/api/drivers')
-    //   .then(response => response.json())
-    //   .then(data => setDrivers(data));
+    fetch('/api/orders')
+      .then(response => response.json())
+      .then(data => {
+        setOrders(data)
+        setFilteredOrders(data);
+      });
+
+    fetch('/api/drivers')
+      .then(response => response.json())
+      .then(data => setDrivers(data));
   }, []);
 
   const showNewOrderModal = () => {
@@ -345,34 +333,28 @@ const OrderManagement: NextPage = () => {
   };
 
   const handleAssignDriverSubmit = () => {
-    assignForm.validateFields().then(values => {
+    assignForm.validateFields().then(async (values) => {
       if (!selectedOrder) return;
       
-      // In a real application, you would send to your API:
-      // fetch(`/api/orders/${selectedOrder.id}/assign`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ driverId: values.driverId })
-      // })
-      //   .then(response => response.json())
-      //   .then(data => {
-      //     const updatedOrders = orders.map(order => 
-      //       order.id === data.id ? data : order
-      //     );
-      //     setOrders(updatedOrders);
-      //     setAssignDriverVisible(false);
-      //   });
-      
-      // For demonstration, we'll just update the local state
-      const updatedOrders = orders.map(order => 
-        order.id === selectedOrder.id 
-          ? { ...order, driverId: values.driverId, status: 'assigned' as const } 
-          : order
-      );
-      
-      setOrders(updatedOrders);
-      setFilteredOrders(updatedOrders);
-      setAssignDriverVisible(false);
+      try {
+        // Update driver status to on_duty and assign vehicle
+        await driversApi.assignVehicle(values.driverId, selectedOrder.carModel);
+        
+        // For demonstration, we'll just update the local state
+        const updatedOrders = orders.map(order => 
+          order.id === selectedOrder.id 
+            ? { ...order, driverId: values.driverId, status: 'assigned' as const } 
+            : order
+        );
+        
+        setOrders(updatedOrders);
+        setFilteredOrders(updatedOrders);
+        setAssignDriverVisible(false);
+        message.success('Driver assigned successfully');
+      } catch (error) {
+        console.error('Error assigning driver:', error);
+        message.error('Failed to assign driver');
+      }
     });
   };
 
@@ -768,7 +750,7 @@ const OrderManagement: NextPage = () => {
           >
             <Select>
               {drivers
-                .filter(driver => driver.available)
+                .filter(driver => driver.status === 'available')
                 .map(driver => (
                   <Option key={driver.id} value={driver.id}>
                     {driver.name}
