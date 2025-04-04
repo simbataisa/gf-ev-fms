@@ -41,7 +41,10 @@ const VehicleTrackingPage: React.FC = () => {
   // Google Maps API loader
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    id: 'google-map-script'
+    id: 'google-map-script',
+    language: 'vi',
+    region: 'VN',
+    libraries: ['places']
   });
 
   const [vehicles, setVehicles] = useState<VehicleTrackingData[]>([]);
