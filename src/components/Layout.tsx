@@ -9,7 +9,8 @@ import {
   UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
+  ShoppingCartOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -53,7 +54,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       icon: <CarOutlined />,
       label: <Link href="/vehicles">Vehicles</Link>,
     },
-
+    {
+      key: '/orders',
+      icon: <ShoppingCartOutlined />,
+      label: <Link href="/orders">Order Management</Link>,
+    },
     {
       key: '/vehicle-onboarding',
       icon: <FileTextOutlined />,
