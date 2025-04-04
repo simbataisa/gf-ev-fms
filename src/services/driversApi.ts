@@ -71,7 +71,7 @@ export const driversApi = {
   
   // Assign a driver to a vehicle
   assignVehicle: async (driverId: string, vehicleInfo: string): Promise<Driver> => {
-    return this.updateDriver(driverId, {
+    return driversApi.updateDriver(driverId, {
       currentVehicle: vehicleInfo,
       status: 'on_duty'
     });
@@ -79,6 +79,6 @@ export const driversApi = {
   
   // Update driver status
   updateDriverStatus: async (driverId: string, status: Driver['status']): Promise<Driver> => {
-    return this.updateDriver(driverId, { status });
+    return driversApi.updateDriver(driverId, { status });
   }
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Key } from 'react';
 import { 
   Typography, 
   Button, 
@@ -18,6 +18,7 @@ import {
   Badge,
   message
 } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { 
   UserAddOutlined, 
   EditOutlined, 
@@ -157,7 +158,7 @@ const DriverManagement: NextPage = () => {
     driver.licenseNumber.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const columns = [
+  const columns: ColumnsType<Driver> = [
     {
       title: 'Driver',
       dataIndex: 'name',
@@ -210,7 +211,7 @@ const DriverManagement: NextPage = () => {
         { text: 'On Leave', value: 'on_leave' },
         { text: 'Inactive', value: 'inactive' },
       ],
-      onFilter: (value: string, record: Driver) => record.status === value,
+      onFilter: (value: boolean | Key, record: Driver) => record.status === value,
     },
     {
       title: 'Current Vehicle',
