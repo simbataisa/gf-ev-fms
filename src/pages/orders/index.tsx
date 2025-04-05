@@ -520,12 +520,13 @@ const OrderManagement: NextPage = () => {
 
   return (
     <AppLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Title level={2}>Order Management</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, alignItems: 'center' }}>
+        <Title level={2} style={{ margin: 0 }}>Order Management</Title>
         <Space>
           <Button 
             icon={<SearchOutlined />} 
             onClick={showSearchModal}
+            style={{ borderRadius: '6px' }}
           >
             Advanced Search
           </Button>
@@ -533,6 +534,7 @@ const OrderManagement: NextPage = () => {
             type="primary" 
             icon={<PlusOutlined />} 
             onClick={showNewOrderModal}
+            style={{ borderRadius: '6px' }}
           >
             New Order
           </Button>
@@ -542,7 +544,8 @@ const OrderManagement: NextPage = () => {
       <Tabs 
         activeKey={activeTab} 
         onChange={setActiveTab}
-        tabBarStyle={{ marginBottom: 16 }}
+        type="card"
+        style={{ marginBottom: 16 }}
       >
         <TabPane 
           tab={

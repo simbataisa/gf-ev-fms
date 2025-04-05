@@ -258,20 +258,21 @@ const DriverManagement: NextPage = () => {
 
   return (
     <AppLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Title level={2}>Driver Management</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, alignItems: 'center' }}>
+        <Title level={2} style={{ margin: 0 }}>Driver Management</Title>
         <Space>
           <Input
             placeholder="Search drivers..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            style={{ width: 250 }}
+            style={{ width: 250, borderRadius: '6px' }}
           />
           <Button 
             type="primary" 
             icon={<UserAddOutlined />} 
             onClick={showAddDriverModal}
+            style={{ borderRadius: '6px' }}
           >
             Add Driver
           </Button>
@@ -280,42 +281,73 @@ const DriverManagement: NextPage = () => {
       
       <Row gutter={[16, 16]}>
         <Col span={6}>
-          <Card title="Available Drivers">
-            <Title level={3} style={{ color: '#52c41a', textAlign: 'center' }}>
+          <Card 
+            title="Available Drivers" 
+            bordered={false} 
+            style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.09)' }}
+            headStyle={{ background: '#f6ffed', color: '#52c41a', borderBottom: '1px solid #b7eb8f' }}
+          >
+            <Title level={3} style={{ color: '#52c41a', textAlign: 'center', margin: 0 }}>
               {drivers.filter(d => d.status === 'available').length}
             </Title>
           </Card>
         </Col>
         <Col span={6}>
-          <Card title="On Duty">
-            <Title level={3} style={{ color: '#1890ff', textAlign: 'center' }}>
+          <Card 
+            title="On Duty" 
+            bordered={false} 
+            style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.09)' }}
+            headStyle={{ background: '#e6f7ff', color: '#1890ff', borderBottom: '1px solid #91d5ff' }}
+          >
+            <Title level={3} style={{ color: '#1890ff', textAlign: 'center', margin: 0 }}>
               {drivers.filter(d => d.status === 'on_duty').length}
             </Title>
           </Card>
         </Col>
         <Col span={6}>
-          <Card title="On Leave">
-            <Title level={3} style={{ color: '#faad14', textAlign: 'center' }}>
+          <Card 
+            title="On Leave" 
+            bordered={false} 
+            style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.09)' }}
+            headStyle={{ background: '#fff7e6', color: '#faad14', borderBottom: '1px solid #ffd591' }}
+          >
+            <Title level={3} style={{ color: '#faad14', textAlign: 'center', margin: 0 }}>
               {drivers.filter(d => d.status === 'on_leave').length}
             </Title>
           </Card>
         </Col>
         <Col span={6}>
-          <Card title="Total Drivers">
-            <Title level={3} style={{ textAlign: 'center' }}>
+          <Card 
+            title="Total Drivers" 
+            bordered={false} 
+            style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.09)' }}
+            headStyle={{ background: '#f0f2f5', borderBottom: '1px solid #d9d9d9' }}
+          >
+            <Title level={3} style={{ textAlign: 'center', margin: 0 }}>
               {drivers.length}
             </Title>
           </Card>
         </Col>
       </Row>
       
-      <Card style={{ marginTop: 16 }}>
+      <Card 
+        style={{ 
+          marginTop: 24, 
+          borderRadius: '8px', 
+          boxShadow: '0 2px 8px rgba(0,0,0,0.09)' 
+        }}
+        bordered={false}
+      >
         <Table 
           columns={columns} 
           dataSource={filteredDrivers} 
           rowKey="id" 
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          pagination={{ 
+            pageSize: 10,
+            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} drivers`
+          }}
+          style={{ marginTop: 8 }}
         />
       </Card>
       
