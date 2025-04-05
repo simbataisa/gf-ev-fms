@@ -1,20 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Task } from '../../../types';
-
-// Mock data for demonstration
-const mockTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Pick up vehicle',
-    description: 'Pick up the vehicle from the depot',
-    status: 'completed',
-    orderId: '1',
-    driverId: '1',
-    dueDate: new Date(2023, 5, 15, 9, 0, 0),
-    completedDate: new Date(2023, 5, 15, 9, 15, 0)
-  },
-  // ... other tasks
-];
+import { mockTasks } from '@/data/mockTasks';
 
 // In-memory store for tasks
 let tasks = [...mockTasks];

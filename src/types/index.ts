@@ -76,7 +76,7 @@ export interface Report {
 
 export type DriverType = 'permanent' | 'seasonal' | 'temporary';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
-export type PaymentStatus = 'paid' | 'pending' | 'to_be_collected';
+export type PaymentStatus = 'paid' | 'pending' | 'to_be_collected' | 'refunded';
 
 export interface Task {
   id: string;
@@ -86,8 +86,10 @@ export interface Task {
   orderId: string;
   driverId: string | null;
   dueDate: Date;
-  completedDate?: Date;
+  completed: boolean;
   notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Driver {
@@ -133,6 +135,7 @@ export interface ExtraFee {
   description: string;
   amount: number;
   status: PaymentStatus;
+  createdAt: Date;
 }
 
 export interface Notification {

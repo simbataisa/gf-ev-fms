@@ -360,9 +360,9 @@ const DriverDashboard: React.FC = () => {
                           Mark as Completed
                         </Button>
                       )}
-                      {task.completedDate && (
+                      {task.completed && (
                         <Text type="secondary">
-                          Completed on {moment(task.completedDate).format('MMM DD, YYYY HH:mm')}
+                          Completed on {moment(task.updatedAt).format('MMM DD, YYYY HH:mm')}
                         </Text>
                       )}
                     </div>

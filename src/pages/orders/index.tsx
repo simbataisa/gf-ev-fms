@@ -313,6 +313,7 @@ const OrderManagement: NextPage = () => {
     return driver ? driver.name : 'Unknown driver';
   };
 
+  // Add this to the columns array
   const columns = [
     {
       title: 'ID',
@@ -363,6 +364,12 @@ const OrderManagement: NextPage = () => {
       key: 'actions',
       render: (_: any, record: Order) => (
         <Space>
+          <Button 
+            size="small"
+            onClick={() => router.push(`/orders/${record.id}`)}
+          >
+            View Details
+          </Button>
           {record.status === 'pending' && (
             <Button 
               type="primary" 
