@@ -1,20 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Tag, Modal, Form, message, Progress, Alert } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import AppLayout from '../../components/Layout';
-import { useVehicles, Vehicle } from '../../hooks/useVehicles';
+import { Vehicle } from '../../types';
 
 const VehiclesPage: React.FC = () => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [batteryFilter, setBatteryFilter] = useState<string | null>(null);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const { useGetVehicles, useCreateVehicle, useUpdateVehicle, useDeleteVehicle } = useVehicles();
-  const { data: vehicles = [], isLoading } = useGetVehicles();
-  const createVehicleMutation = useCreateVehicle();
-  const updateVehicleMutation = useUpdateVehicle();
-  const deleteVehicleMutation = useDeleteVehicle();
+  // Fetch vehicles from API
+  const fetchVehicles = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/vehicles');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setVehicles(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching vehicles:', error);
+      message.error('Failed to load vehicles');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Create a new vehicle
+  const createVehicle = async (vehicleData: Omit<Vehicle, 'id'>) => {
+    try {
+      const response = await fetch('/api/vehicles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(vehicleData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      await fetchVehicles(); // Refresh the list
+      return true;
+    } catch (error) {
+      console.error('Error creating vehicle:', error);
+      throw error;
+    }
+  };
+
+  // Update an existing vehicle
+  const updateVehicle = async (id: string, vehicleData: Partial<Vehicle>) => {
+    try {
+      const response = await fetch(`/api/vehicles/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(vehicleData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      await fetchVehicles(); // Refresh the list
+      return true;
+    } catch (error) {
+      console.error('Error updating vehicle:', error);
+      throw error;
+    }
+  };
+
+  // Delete a vehicle
+  const deleteVehicle = async (id: string) => {
+    try {
+      const response = await fetch(`/api/vehicles/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      await fetchVehicles(); // Refresh the list
+      return true;
+    } catch (error) {
+      console.error('Error deleting vehicle:', error);
+      throw error;
+    }
+  };
+
+  // Load vehicles on component mount
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
 
   // Filter vehicles based on battery level
   const filteredVehicles = batteryFilter 
@@ -48,6 +132,7 @@ const VehiclesPage: React.FC = () => {
       range: vehicle.range,
       status: vehicle.status,
       currentCharge: vehicle.currentCharge,
+      color: vehicle.color,
     });
     setIsModalVisible(true);
   };
@@ -56,21 +141,27 @@ const VehiclesPage: React.FC = () => {
     setIsModalVisible(false);
   };
 
+  // Add a loading state for form submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async () => {
     try {
+      setIsSubmitting(true); // Set loading state to true when submitting
       const values = await form.validateFields();
       
       if (editingVehicle) {
-        await updateVehicleMutation.mutateAsync({ id: editingVehicle.id, ...values });
+        await updateVehicle(editingVehicle.id, values);
         message.success('Vehicle updated successfully');
       } else {
-        await createVehicleMutation.mutateAsync(values);
+        await createVehicle(values as Omit<Vehicle, 'id'>);
         message.success('Vehicle created successfully');
       }
       
       setIsModalVisible(false);
     } catch (error) {
       console.error('Error submitting form:', error);
+    } finally {
+      setIsSubmitting(false); // Reset loading state when done
     }
   };
 
@@ -83,7 +174,7 @@ const VehiclesPage: React.FC = () => {
       cancelText: 'No',
       onOk: async () => {
         try {
-          await deleteVehicleMutation.mutateAsync(id);
+          await deleteVehicle(id);
           message.success('Vehicle deleted successfully');
         } catch (error) {
           message.error('Failed to delete vehicle');
@@ -218,7 +309,7 @@ const VehiclesPage: React.FC = () => {
         visible={isModalVisible}
         onCancel={handleCancel}
         onOk={handleSubmit}
-        confirmLoading={createVehicleMutation.isLoading || updateVehicleMutation.isLoading}
+        confirmLoading={isSubmitting} // Use the new isSubmitting state
         width={600}
       >
         <Form

@@ -22,44 +22,30 @@ import {
   message
 } from 'antd';
 import { PlusOutlined, SearchOutlined, CalendarOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/router';
 import AppLayout from '../../components/Layout';
 import type { NextPage } from 'next';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { driversApi } from '../../services/driversApi';
-import { Driver } from '../../types/index';
+import { Driver, Order } from '../../types/index';
 
 const { Title } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-interface Order {
-  id: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail: string;
-  address: string;
-  orderType: 'delivery' | 'pickup';
-  scheduledTime: Date;
-  carModel: string;
-  status: 'pending' | 'assigned' | 'completed';
-  driverId: string | null;
-}
-
 const OrderManagement: NextPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [newOrderVisible, setNewOrderVisible] = useState(false);
-  const [assignDriverVisible, setAssignDriverVisible] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [form] = Form.useForm();
-  const [assignForm] = Form.useForm();
-  const [searchForm] = Form.useForm();
   const [searchVisible, setSearchVisible] = useState(false);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState('list');
   const [dayViewVisible, setDayViewVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Moment | null>(null);
+  const [form] = Form.useForm();
+  const [searchForm] = Form.useForm();
+  const router = useRouter();
 
   const MAX_DAILY_SLOTS = 20; // Maximum number of orders allowed per day
 
@@ -241,14 +227,9 @@ const OrderManagement: NextPage = () => {
     setNewOrderVisible(false);
   };
 
-  const showAssignDriverModal = (order: Order) => {
-    setSelectedOrder(order);
-    assignForm.resetFields();
-    setAssignDriverVisible(true);
-  };
-
-  const handleAssignDriverCancel = () => {
-    setAssignDriverVisible(false);
+  const handleAssignDriver = (order: Order) => {
+    // Navigate to the assign page with the order ID
+    router.push(`/orders/assign?id=${order.id}`);
   };
 
   const showSearchModal = () => {
@@ -299,18 +280,6 @@ const OrderManagement: NextPage = () => {
 
   const handleNewOrderSubmit = () => {
     form.validateFields().then(values => {
-      // In a real application, you would send to your API:
-      // fetch('/api/orders', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(values)
-      // })
-      //   .then(response => response.json())
-      //   .then(data => {
-      //     setOrders([...orders, data]);
-      //     setNewOrderVisible(false);
-      //   });
-      
       // For demonstration, we'll just add to the local state
       const newOrder: Order = {
         id: String(orders.length + 1),
@@ -322,39 +291,19 @@ const OrderManagement: NextPage = () => {
         scheduledTime: values.scheduledTime.toDate(),
         carModel: values.carModel,
         status: 'pending',
-        driverId: null
+        driverId: null,
+        // Add missing properties to match Order interface
+        vehicleId: null,
+        paymentStatus: 'pending',
+        paymentAmount: 0,
+        extraFees: [],
+        tasks: []
       };
       
       const updatedOrders = [...orders, newOrder];
       setOrders(updatedOrders);
       setFilteredOrders(updatedOrders);
       setNewOrderVisible(false);
-    });
-  };
-
-  const handleAssignDriverSubmit = () => {
-    assignForm.validateFields().then(async (values) => {
-      if (!selectedOrder) return;
-      
-      try {
-        // Update driver status to on_duty and assign vehicle
-        await driversApi.assignVehicle(values.driverId, selectedOrder.carModel);
-        
-        // For demonstration, we'll just update the local state
-        const updatedOrders = orders.map(order => 
-          order.id === selectedOrder.id 
-            ? { ...order, driverId: values.driverId, status: 'assigned' as const } 
-            : order
-        );
-        
-        setOrders(updatedOrders);
-        setFilteredOrders(updatedOrders);
-        setAssignDriverVisible(false);
-        message.success('Driver assigned successfully');
-      } catch (error) {
-        console.error('Error assigning driver:', error);
-        message.error('Failed to assign driver');
-      }
     });
   };
 
@@ -418,7 +367,7 @@ const OrderManagement: NextPage = () => {
             <Button 
               type="primary" 
               size="small"
-              onClick={() => showAssignDriverModal(record)}
+              onClick={() => handleAssignDriver(record)}
             >
               Assign Driver
             </Button>
@@ -428,7 +377,7 @@ const OrderManagement: NextPage = () => {
               type="primary" 
               size="small"
               danger
-              onClick={() => showAssignDriverModal(record)}
+              onClick={() => handleAssignDriver(record)}
             >
               Re-assign Driver
             </Button>
@@ -728,43 +677,6 @@ const OrderManagement: NextPage = () => {
         </Form>
       </Modal>
       
-      {/* Assign Driver Modal */}
-      <Modal
-        title="Assign Driver"
-        visible={assignDriverVisible}
-        onCancel={handleAssignDriverCancel}
-        onOk={handleAssignDriverSubmit}
-      >
-        {selectedOrder && (
-          <div style={{ marginBottom: 16 }}>
-            <p><strong>Order #{selectedOrder.id}</strong> - {selectedOrder.orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
-            <p>{selectedOrder.customerName} - {selectedOrder.scheduledTime.toLocaleString()}</p>
-          </div>
-        )}
-        
-        <Form
-          form={assignForm}
-          layout="vertical"
-        >
-          <Form.Item
-            name="driverId"
-            label="Select Driver"
-            rules={[{ required: true, message: 'Please select a driver' }]}
-          >
-            <Select>
-              {drivers
-                .filter(driver => driver.status === 'available')
-                .map(driver => (
-                  <Option key={driver.id} value={driver.id}>
-                    {driver.name}
-                  </Option>
-                ))
-              }
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
-      
       {/* Day View Modal */}
       <Modal
         title={selectedDate ? `Orders for ${selectedDate.format('MMMM D, YYYY')}` : 'Day View'}
@@ -830,8 +742,6 @@ const OrderManagement: NextPage = () => {
           <Empty description="No orders scheduled for this day" />
         )}
       </Modal>
-      
-      {/* ... other existing modals ... */}
     </AppLayout>
   );
 };

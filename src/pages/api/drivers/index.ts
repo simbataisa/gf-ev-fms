@@ -15,7 +15,11 @@ const mockDrivers: Driver[] = [
     address: '123 Lê Lợi, Quận 1, TP.HCM',
     joinDate: '2022-03-15',
     currentVehicle: null,
-    totalTrips: 156
+    totalTrips: 156,
+    driverType: 'permanent',
+    eKYCVerified: true,
+    performanceScore: 92,
+    jobsCompleted: 148
   },
   {
     id: '2',
@@ -29,7 +33,11 @@ const mockDrivers: Driver[] = [
     address: '456 Nguyễn Huệ, Quận 1, TP.HCM',
     joinDate: '2022-05-20',
     currentVehicle: 'VF-8 Premium (51F-123.45)',
-    totalTrips: 132
+    totalTrips: 132,
+    driverType: 'permanent',
+    eKYCVerified: true,
+    performanceScore: 85,
+    jobsCompleted: 125
   },
   {
     id: '3',
@@ -43,7 +51,11 @@ const mockDrivers: Driver[] = [
     address: '789 Điện Biên Phủ, Quận 3, TP.HCM',
     joinDate: '2022-01-10',
     currentVehicle: null,
-    totalTrips: 98
+    totalTrips: 98,
+    driverType: 'seasonal',
+    eKYCVerified: true,
+    performanceScore: 78,
+    jobsCompleted: 90
   },
   {
     id: '4',
@@ -57,7 +69,11 @@ const mockDrivers: Driver[] = [
     address: '321 Võ Văn Tần, Quận 3, TP.HCM',
     joinDate: '2022-07-05',
     currentVehicle: null,
-    totalTrips: 145
+    totalTrips: 145,
+    driverType: 'permanent',
+    eKYCVerified: true,
+    performanceScore: 95,
+    jobsCompleted: 140
   },
   {
     id: '5',
@@ -71,7 +87,11 @@ const mockDrivers: Driver[] = [
     address: '567 Cách Mạng Tháng 8, Quận 10, TP.HCM',
     joinDate: '2022-02-28',
     currentVehicle: 'VF-9 Luxury (30F-789.12)',
-    totalTrips: 167
+    totalTrips: 167,
+    driverType: 'permanent',
+    eKYCVerified: true,
+    performanceScore: 88,
+    jobsCompleted: 160
   }
 ];
 
