@@ -30,6 +30,12 @@ import moment from 'moment';
 import { driversApi } from '../../services/driversApi';
 import { Driver, Order } from '../../types/index';
 
+import OrderTable from '../../components/orders/OrderTable';
+import CalendarView from '../../components/orders/CalendarView';
+import NewOrderModal from '../../components/orders/NewOrderModal';
+import SearchModal from '../../components/orders/SearchModal';
+import DayViewModal from '../../components/orders/DayViewModal';
+
 const { Title } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -464,7 +470,10 @@ const OrderManagement: NextPage = () => {
   const onCalendarSelect = (date: Moment) => {
     setSelectedDate(date);
     setDayViewVisible(true);
-    const ordersForDate = getOrdersForDate(date);
+    const ordersForDate = orders.filter(order => {
+      const orderDate = moment(order.scheduledTime);
+      return orderDate.isSame(date, 'day');
+    });
     setFilteredOrders(ordersForDate);
   };
 
@@ -481,7 +490,7 @@ const OrderManagement: NextPage = () => {
         <Space>
           <Button 
             icon={<SearchOutlined />} 
-            onClick={showSearchModal}
+            onClick={() => setSearchVisible(true)}
             style={{ borderRadius: '6px' }}
           >
             Advanced Search
@@ -489,7 +498,7 @@ const OrderManagement: NextPage = () => {
           <Button 
             type="primary" 
             icon={<PlusOutlined />} 
-            onClick={showNewOrderModal}
+            onClick={() => setNewOrderVisible(true)}
             style={{ borderRadius: '6px' }}
           >
             New Order
@@ -512,11 +521,10 @@ const OrderManagement: NextPage = () => {
           } 
           key="list"
         >
-          <Table 
-            columns={columns} 
-            dataSource={filteredOrders} 
-            rowKey="id" 
-            pagination={{ pageSize: 10 }}
+          <OrderTable 
+            orders={filteredOrders} 
+            drivers={drivers} 
+            onAssignDriver={handleAssignDriver} 
           />
         </TabPane>
         <TabPane 
@@ -528,227 +536,36 @@ const OrderManagement: NextPage = () => {
           } 
           key="calendar"
         >
-          <Card>
-            <Calendar 
-              dateCellRender={dateCellRender} 
-              onSelect={onCalendarSelect}
-            />
-          </Card>
+          <CalendarView 
+            orders={filteredOrders} 
+            maxDailySlots={MAX_DAILY_SLOTS} 
+            onSelectDate={onCalendarSelect} 
+          />
         </TabPane>
       </Tabs>
       
-      {/* New Order Modal */}
-      <Modal
-        title="Create New Order"
-        visible={newOrderVisible}
-        onCancel={handleNewOrderCancel}
-        onOk={handleNewOrderSubmit}
-        width={800}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-        >
-          <Form.Item
-            name="customerName"
-            label="Customer Name"
-            rules={[{ required: true, message: 'Please enter customer name' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="customerPhone"
-            label="Phone Number"
-            rules={[{ required: true, message: 'Please enter phone number' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="customerEmail"
-            label="Email"
-            rules={[
-              { required: true, message: 'Please enter email' },
-              { type: 'email', message: 'Please enter a valid email' }
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="address"
-            label="Address"
-            rules={[{ required: true, message: 'Please enter address' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="orderType"
-            label="Order Type"
-            rules={[{ required: true, message: 'Please select order type' }]}
-          >
-            <Select>
-              <Option value="delivery">Delivery</Option>
-              <Option value="pickup">Pickup</Option>
-            </Select>
-          </Form.Item>
-          
-          <Form.Item
-            name="carModel"
-            label="Car Model"
-            rules={[{ required: true, message: 'Please enter car model' }]}
-          >
-            <Input />
-          </Form.Item>
-          
-          <Form.Item
-            name="scheduledTime"
-            label="Scheduled Time"
-            rules={[{ required: true, message: 'Please select scheduled time' }]}
-          >
-            <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      {/* Modals */}
+      <NewOrderModal 
+        visible={newOrderVisible} 
+        onCancel={() => setNewOrderVisible(false)} 
+        onSubmit={handleNewOrderSubmit} 
+      />
       
-      {/* Advanced Search Modal */}
-      <Modal
-        title="Advanced Search"
-        visible={searchVisible}
-        onCancel={handleSearchCancel}
-        onOk={handleSearch}
-        width={700}
-      >
-        <Form
-          form={searchForm}
-          layout="vertical"
-        >
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="customerName"
-                label="Customer Name"
-              >
-                <Input placeholder="Search by customer name" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="orderType"
-                label="Order Type"
-              >
-                <Select allowClear placeholder="Select order type">
-                  <Option value="delivery">Delivery</Option>
-                  <Option value="pickup">Pickup</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="carModel"
-                label="Car Model"
-              >
-                <Select allowClear placeholder="Select car model">
-                  <Option value="VF e34">VF e34</Option>
-                  <Option value="VF 5">VF 5</Option>
-                  <Option value="VF 6">VF 6</Option>
-                  <Option value="VF 7">VF 7</Option>
-                  <Option value="VF 8">VF 8</Option>
-                  <Option value="VF 9">VF 9</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="status"
-                label="Status"
-              >
-                <Select allowClear placeholder="Select status">
-                  <Option value="pending">Pending</Option>
-                  <Option value="assigned">Assigned</Option>
-                  <Option value="completed">Completed</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item
-            name="dateRange"
-            label="Date Range"
-          >
-            <DatePicker.RangePicker style={{ width: '100%' }} />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <SearchModal 
+        visible={searchVisible} 
+        onCancel={() => setSearchVisible(false)} 
+        onSearch={handleSearch} 
+      />
       
-      {/* Day View Modal */}
-      <Modal
-        title={selectedDate ? `Orders for ${selectedDate.format('MMMM D, YYYY')}` : 'Day View'}
+      <DayViewModal 
         visible={dayViewVisible}
-        onCancel={handleDayViewClose}
-        footer={[
-          <Button key="close" onClick={handleDayViewClose}>
-            Close
-          </Button>
-        ]}
-        width={1000}
-      >
-        <div style={{ marginBottom: 16 }}>
-          <Row gutter={[16, 16]}>
-            <Col span={8}>
-              <Card>
-                <Statistic 
-                  title="Total Orders" 
-                  value={filteredOrders.length} 
-                  suffix={`/ ${MAX_DAILY_SLOTS}`}
-                />
-                <div style={{ marginTop: 8 }}>
-                  <Progress 
-                    percent={Math.round((filteredOrders.length / MAX_DAILY_SLOTS) * 100)} 
-                    status={
-                      filteredOrders.length / MAX_DAILY_SLOTS > 0.7 
-                        ? 'exception' 
-                        : filteredOrders.length / MAX_DAILY_SLOTS > 0.3 
-                          ? 'normal' 
-                          : 'success'
-                    }
-                  />
-                </div>
-              </Card>
-            </Col>
-            <Col span={8}>
-              <Card>
-                <Statistic 
-                  title="Pending Orders" 
-                  value={filteredOrders.filter(order => order.status === 'pending').length} 
-                />
-              </Card>
-            </Col>
-            <Col span={8}>
-              <Card>
-                <Statistic 
-                  title="Assigned Orders" 
-                  value={filteredOrders.filter(order => order.status === 'assigned').length} 
-                />
-              </Card>
-            </Col>
-          </Row>
-        </div>
-        
-        <Table 
-          columns={columns} 
-          dataSource={filteredOrders} 
-          rowKey="id" 
-          pagination={false}
-        />
-        
-        {filteredOrders.length === 0 && (
-          <Empty description="No orders scheduled for this day" />
-        )}
-      </Modal>
+        onClose={handleDayViewClose}
+        selectedDate={selectedDate}
+        orders={filteredOrders}
+        drivers={drivers}
+        maxDailySlots={MAX_DAILY_SLOTS}
+        onAssignDriver={handleAssignDriver}
+      />
     </AppLayout>
   );
 };
